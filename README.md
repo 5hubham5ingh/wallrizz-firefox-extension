@@ -1,5 +1,11 @@
-# WallRizzFox  
-A Firefox add-on that changes its theme dynamically.
+<h1 align="center" - click me!>
+
+<img src="https://github.com/user-attachments/assets/8b245e2b-303b-4a54-b4db-127d1c6386c2" alt="Rizzed fox" style="width: 30%;">
+
+  WallRizzFox  
+  <h4 align="center"> A Firefox add-on that changes its theme dynamically using WallRizz.</h4>
+
+</h1>
 
 ![ezgif com-animated-gif-maker(4)](https://github.com/user-attachments/assets/2596446d-0da4-47bd-90f6-82d857a43865)
 
