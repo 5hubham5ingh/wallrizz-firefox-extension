@@ -1,7 +1,7 @@
 const port = browser.runtime.connectNative("WallRizzFox");
 
 let interval;
-const activateExtension = () => {
+const toggleExtension = () => {
   if (interval) {
     console.log("Extension disabled");
     clearInterval(interval);
@@ -12,9 +12,9 @@ const activateExtension = () => {
   }
 };
 
-activateExtension();
+toggleExtension();
 
-browser.browserAction.onClicked.addListener(activateExtension);
+browser.browserAction.onClicked.addListener(toggleExtension);
 
 port.onMessage.addListener(async (message) => {
   if (message.status === 1) {
