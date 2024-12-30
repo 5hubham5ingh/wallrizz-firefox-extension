@@ -8,7 +8,14 @@ const toggleExtension = () => {
     interval = undefined;
   } else {
     console.log("Fetching theme");
-    interval = setInterval(() => port.postMessage("getTheme"), 500);
+    interval = setInterval(() => {
+      try {
+        port.postMessage("getTheme")
+      } catch (error) {
+        console.error(error)
+        clearInterval(interval)
+      }
+    }, 500);
   }
 };
 
