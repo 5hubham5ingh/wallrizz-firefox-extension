@@ -25,7 +25,7 @@ function sendMessage(message) {
 let lastMTime;
 function sendTheme() {
   const themeFilePathCache = getenv("HOME")?.concat(
-    "/.cache/WallRizz/firefox.txt",
+    "/.cache/WallRizzFox/themeConfigPath.txt",
   );
 
   const [fileStats, err] = stat(themeFilePathCache);
