@@ -23,17 +23,6 @@ function sendMessage(message) {
   stdout.flush();
 }
 
-function isCacheValid(cacheId, cacheType) {
-  sendMessage({
-    status: 0,
-    type: cacheType,
-    cacheId,
-  });
-
-  const cacheStatus = getMessage().trim();
-  return cacheStatus.trim() === "true" ? true : false;
-}
-
 let lastMTime;
 function sendTheme() {
   const themeFilePathCache = getenv("HOME")?.concat(
@@ -52,7 +41,6 @@ function sendTheme() {
 
   const currentThemeFilePath = loadFile(themeFilePathCache);
 
-  if (isCacheValid(currentThemeFilePath.trim(), "themeCache")) return;
   const currentTheme = loadFile(currentThemeFilePath.trim());
   if (currentTheme) {
     const message = {
@@ -72,51 +60,67 @@ function sendTheme() {
 let wallpaperFileTransferOffset = 0;
 let wallpaperLastMTime;
 let image;
+const chunkSize = 1048000;
+const wallpaperFilePathCache = getenv("HOME")?.concat(
+  "/.cache/WallRizzFox/wallpaperPath.txt",
+);
 async function sendWallpaper() {
-  const sendData = (cacheId) => {
+  const sendData = () => {
+    // Single slice operation
     const data = image.slice(
       wallpaperFileTransferOffset,
-      wallpaperFileTransferOffset + 512,
+      wallpaperFileTransferOffset += chunkSize,
     );
-    wallpaperFileTransferOffset += data.length;
-    if (wallpaperFileTransferOffset >= image.length) {
-      wallpaperFileTransferOffset = 0;
-    }
+
+    const isLastChunk = wallpaperFileTransferOffset >= image.length;
+
     sendMessage({
-      status: wallpaperFileTransferOffset === 0 ? 0 : 0.5,
+      status: isLastChunk ? 0 : 0.5,
       type: "wallpaper",
       data,
-      cacheId,
     });
+
+    if (isLastChunk) {
+      wallpaperFileTransferOffset = 0;
+    }
   };
 
+  // Handle ongoing transfers
   if (wallpaperFileTransferOffset !== 0) {
     sendData();
     return;
-  } // send remaining string.
-
-  const wallpaperFilePathCache = getenv("HOME")?.concat(
-    "/.cache/WallRizzFox/wallpaperPath.txt",
-  );
-
-  const [fileStats, err] = stat(wallpaperFilePathCache);
-  if (err !== 0) {
-    throw Error(
-      "Failed to read " + wallpaperFilePathCache + " stats." +
-        "\nError code: " + err,
-    );
   }
-  if (wallpaperLastMTime && fileStats.mtime <= wallpaperLastMTime) return;
-  const wallpaperPath = loadFile(wallpaperFilePathCache).trim();
 
-  if (isCacheValid(wallpaperPath.trim(), "wallpaperCache")) return;
+  try {
+    const [fileStats, err] = stat(wallpaperFilePathCache);
 
-  wallpaperLastMTime = fileStats.mtime;
-  const imageBase64encoded = await execAsync(["base64", wallpaperPath]);
-  image = `data:image/${
-    wallpaperPath.slice(wallpaperPath.lastIndexOf(".") + 1)
-  };base64,${imageBase64encoded}`;
-  sendData(wallpaperPath);
+    if (err !== 0) {
+      throw Error(
+        `Failed to read ${wallpaperFilePathCache} stats.\nError code: ${err}`,
+      );
+    }
+
+    // Skip if file hasn't changed
+    if (wallpaperLastMTime && fileStats.mtime <= wallpaperLastMTime) {
+      return;
+    }
+
+    const wallpaperPath = loadFile(wallpaperFilePathCache).trim();
+    wallpaperLastMTime = fileStats.mtime;
+
+    // Extract extension once
+    const extension = wallpaperPath.slice(wallpaperPath.lastIndexOf(".") + 1);
+
+    // Combine base64 encoding and data URL creation
+    const imageBase64encoded = await execAsync(["base64", wallpaperPath]);
+    image = `data:image/${extension};base64,${imageBase64encoded}`;
+
+    sendData();
+  } catch (error) {
+    // Reset state on error
+    wallpaperFileTransferOffset = 0;
+    throw error;
+  }
 }
 
 if (isatty()) {

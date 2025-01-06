@@ -24,7 +24,6 @@ toggleExtension();
 browser.browserAction.onClicked.addListener(toggleExtension);
 
 let base64Wallpaper = "";
-let cacheIdRecord;
 port.onMessage.addListener(async (message) => {
   if (message.status === 1) {
     console.error(message.data);
@@ -35,29 +34,19 @@ port.onMessage.addListener(async (message) => {
   switch (message.type) {
     case "theme": {
       console.log("fetching theme");
-      setCache(message.cacheId, message.data);
       await setTheme(message.data);
       break;
     }
     case "wallpaper":
       if (message.status === 0.5) {
         base64Wallpaper += message.data;
-        cacheIdRecord = message.cacheId ?? cacheIdRecord;
         port.postMessage("getWallpaper");
       } else {
+        base64Wallpaper += message.data;
         await setWallpaper(base64Wallpaper);
-        setCache(cacheIdRecord, message.data);
-        cacheIdRecord = null;
+        base64Wallpaper = "";
       }
       break;
-    case "wallpaperCache":
-    case "themeCache": {
-      const cache = getCache(message.cacheId);
-      if (cache) {
-        message.type === "themeCache" ? setTheme(cache) : setWallpaper(cache);
-        port.postMessage("true");
-      } else port.postMessage("false");
-    }
   }
 });
 
@@ -76,16 +65,6 @@ async function setTheme(data) {
 }
 
 async function setWallpaper(data) {
+  // send data to script.js via message
   console.log(data);
-}
-
-const cache = {};
-function setCache(cacheId, data) {
-  cache[cacheId] = data;
-}
-function getCache(cacheId) {
-  if (cache[cacheId]) {
-    console.log("cache hit for cache id ; ", cacheId);
-    return cache[cacheId];
-  }
 }
