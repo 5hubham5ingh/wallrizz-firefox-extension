@@ -26,3 +26,6 @@ Click on the browser action button of the WallRizzFox add-on to toggle between e
 
 **3. Debugging?**  
 Navigate to `about:debugging#/runtime/this-firefox` in Firefox and click the `inspect` button for the WallRizzFox add-on to view logs and errors for both the add-on and the native app.  
+
+## TODO
+- Add caching
