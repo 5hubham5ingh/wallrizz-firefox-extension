@@ -33,7 +33,7 @@ function sendTheme() {
   if (err !== 0) {
     throw Error(
       "Failed to read " + themeFilePathCache + " stats." +
-        "\nError code: " + err,
+      "\nError code: " + err,
     );
   }
   if (lastMTime && fileStats.mtime <= lastMTime) return;
@@ -139,7 +139,7 @@ if (isatty()) {
   if (!nativeAppManifest) {
     print(
       '  Failed to open native app manifest "' + nativeAppManifestFilePath +
-        '".\n  Run "sudo WallRizzFox" to generate the app manifest.',
+      '".\n  Run "sudo WallRizzFox" to generate the app manifest.',
     );
     exit(1);
   }

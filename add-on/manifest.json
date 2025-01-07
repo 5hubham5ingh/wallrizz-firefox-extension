@@ -1,5 +1,4 @@
 {
-
   "description": "Dynamic firefox theme using WallRizz",
 
   "manifest_version": 2,
@@ -28,6 +27,9 @@
     "default_title": "Toggle extension."
   },
 
-  "permissions": ["nativeMessaging","theme"]
+  "permissions": ["nativeMessaging", "theme","storage"],
 
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  }
 }
