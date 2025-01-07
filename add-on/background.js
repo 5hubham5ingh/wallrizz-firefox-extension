@@ -40,11 +40,18 @@ port.onMessage.addListener(async (message) => {
     case "wallpaper":
       if (message.status === 0.5) {
         base64Wallpaper += message.data;
+        console.log(
+          "wallpaper chunk received",
+          base64Wallpaper.length,
+          message.data.length,
+        );
         port.postMessage("getWallpaper");
       } else {
         base64Wallpaper += message.data;
         await setWallpaper(base64Wallpaper);
+        console.log("Transfer completed", "received: ", base64Wallpaper.length);
         base64Wallpaper = "";
+        console.log("reset base64Wallpaper buffer: ", base64Wallpaper.length);
       }
       break;
   }
@@ -66,12 +73,11 @@ async function setTheme(data) {
 
 async function setWallpaper(data) {
   // send data to script.js via message
-  console.log('saving data in indexDb')
-  await storeDataInIndexedDB(data)
-  console.log("data saved. sending status = 0 ")
-  browser.local.storage.set({ status: 0 })
+  console.log("saving data in indexDb", data);
+  await storeDataInIndexedDB(data);
+  console.log("data saved. sending status = 0 ");
+  browser.local.storage.set({ status: 0 });
 }
-
 
 const dbName = "myDatabase";
 const storeName = "myStore";
@@ -113,4 +119,3 @@ async function storeDataInIndexedDB(data) {
     };
   });
 }
-

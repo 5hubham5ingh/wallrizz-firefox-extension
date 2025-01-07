@@ -33,7 +33,7 @@ function sendTheme() {
   if (err !== 0) {
     throw Error(
       "Failed to read " + themeFilePathCache + " stats." +
-      "\nError code: " + err,
+        "\nError code: " + err,
     );
   }
   if (lastMTime && fileStats.mtime <= lastMTime) return;
@@ -47,7 +47,6 @@ function sendTheme() {
       status: 0,
       type: "theme",
       data: currentTheme,
-      cacheId: currentThemeFilePath.trim(),
     };
     sendMessage(message);
   } else {
@@ -60,19 +59,25 @@ function sendTheme() {
 let wallpaperFileTransferOffset = 0;
 let wallpaperLastMTime;
 let image;
-const chunkSize = 1048000;
+const chunkSize = 1000000;
 const wallpaperFilePathCache = getenv("HOME")?.concat(
   "/.cache/WallRizzFox/wallpaperPath.txt",
 );
+
 async function sendWallpaper() {
+  image = "";
   const sendData = () => {
-    // Single slice operation
-    const data = image.slice(
-      wallpaperFileTransferOffset,
-      wallpaperFileTransferOffset += chunkSize,
+    // Calculate the end position for this chunk
+    const endPosition = Math.min(
+      wallpaperFileTransferOffset + chunkSize,
+      image.length,
     );
 
-    const isLastChunk = wallpaperFileTransferOffset >= image.length;
+    // Slice the data
+    const data = image.slice(wallpaperFileTransferOffset, endPosition);
+
+    // Update offset after slicing
+    const isLastChunk = endPosition >= image.length;
 
     sendMessage({
       status: isLastChunk ? 0 : 0.5,
@@ -82,6 +87,8 @@ async function sendWallpaper() {
 
     if (isLastChunk) {
       wallpaperFileTransferOffset = 0;
+    } else {
+      wallpaperFileTransferOffset = endPosition;
     }
   };
 
@@ -91,36 +98,28 @@ async function sendWallpaper() {
     return;
   }
 
-  try {
-    const [fileStats, err] = stat(wallpaperFilePathCache);
-
-    if (err !== 0) {
-      throw Error(
-        `Failed to read ${wallpaperFilePathCache} stats.\nError code: ${err}`,
-      );
-    }
-
-    // Skip if file hasn't changed
-    if (wallpaperLastMTime && fileStats.mtime <= wallpaperLastMTime) {
-      return;
-    }
-
-    const wallpaperPath = loadFile(wallpaperFilePathCache).trim();
-    wallpaperLastMTime = fileStats.mtime;
-
-    // Extract extension once
-    const extension = wallpaperPath.slice(wallpaperPath.lastIndexOf(".") + 1);
-
-    // Combine base64 encoding and data URL creation
-    const imageBase64encoded = await execAsync(["base64", wallpaperPath]);
-    image = `data:image/${extension};base64,${imageBase64encoded}`;
-
-    sendData();
-  } catch (error) {
-    // Reset state on error
-    wallpaperFileTransferOffset = 0;
-    throw error;
+  const [fileStats, err] = stat(wallpaperFilePathCache);
+  if (err !== 0) {
+    throw Error(
+      `Failed to read ${wallpaperFilePathCache} stats.\nError code: ${err}`,
+    );
   }
+
+  // Skip if file hasn't changed
+  if (wallpaperLastMTime && fileStats.mtime <= wallpaperLastMTime) {
+    return;
+  }
+
+  const wallpaperPath = loadFile(wallpaperFilePathCache).trim();
+  wallpaperLastMTime = fileStats.mtime;
+
+  // Extract extension once
+  const extension = wallpaperPath.slice(wallpaperPath.lastIndexOf(".") + 1);
+
+  // Combine base64 encoding and data URL creation
+  const imageBase64encoded = await execAsync(["base64", wallpaperPath]);
+  image = `data:image/${extension};base64,${imageBase64encoded}`;
+  sendData();
 }
 
 if (isatty()) {
@@ -139,7 +138,7 @@ if (isatty()) {
   if (!nativeAppManifest) {
     print(
       '  Failed to open native app manifest "' + nativeAppManifestFilePath +
-      '".\n  Run "sudo WallRizzFox" to generate the app manifest.',
+        '".\n  Run "sudo WallRizzFox" to generate the app manifest.',
     );
     exit(1);
   }
