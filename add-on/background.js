@@ -23,7 +23,8 @@ toggleExtension();
 
 browser.browserAction.onClicked.addListener(toggleExtension);
 
-let base64Wallpaper = "";
+
+const wallpaperChunks = [];
 port.onMessage.addListener(async (message) => {
   if (message.status === 1) {
     console.error(message.data);
@@ -31,27 +32,31 @@ port.onMessage.addListener(async (message) => {
     interval = undefined;
     return;
   }
+
   switch (message.type) {
-    case "theme": {
+    case "theme":
       console.log("fetching theme");
       await setTheme(message.data);
       break;
-    }
     case "wallpaper":
       if (message.status === 0.5) {
-        base64Wallpaper += message.data;
+        wallpaperChunks.push(message.data);
         console.log(
-          "wallpaper chunk received",
-          base64Wallpaper.length,
+          "Wallpaper chunk received",
+          wallpaperChunks.reduce((acc, chunk) => acc + chunk.length, 0),
+          "data received",
           message.data.length,
         );
         port.postMessage("getWallpaper");
-      } else {
-        base64Wallpaper += message.data;
+      } else if (message.status === 0) {
+        wallpaperChunks.push(message.data);
+        const base64Wallpaper = wallpaperChunks.join("");
         await setWallpaper(base64Wallpaper);
-        console.log("Transfer completed", "received: ", base64Wallpaper.length);
-        base64Wallpaper = "";
-        console.log("reset base64Wallpaper buffer: ", base64Wallpaper.length);
+        console.log("Transfer completed", "received:", base64Wallpaper.length);
+
+        // Clear chunks
+        wallpaperChunks.length = 0;
+        console.log("Reset wallpaper chunks.");
       }
       break;
   }
@@ -76,7 +81,7 @@ async function setWallpaper(data) {
   console.log("saving data in indexDb", data);
   await storeDataInIndexedDB(data);
   console.log("data saved. sending status = 0 ");
-  browser.local.storage.set({ status: 0 });
+  browser.storage.local.set({ status: 0 });
 }
 
 const dbName = "myDatabase";

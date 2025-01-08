@@ -3,20 +3,17 @@ console.log("script.js")
 let wallpaper = '';
 
 
-browser.storage.onChanged.addListener(async (changes, area) => {
+browser.storage.local.onChanged.addListener(async (changes, area) => {
   console.log('local Storage updated');
 
-  const wallpaperUpdated = changes?.status === 0;;
-  if (wallpaperUpdated) {
-    console.log('getting data from indexDb')
-    const wallpaper = await retrieveDataFromIndexedDB();
-    setWallpaper(wallpaper)
-  }
+  console.log('getting data from indexDb')
+  const wallpaper = await retrieveDataFromIndexedDB();
+  setWallpaper(wallpaper)
 });
 
 const dbName = "myDatabase";
 const storeName = "myStore";
-document.addEventListener('DOMContentLoaded', async () =>
+document.addEventListener('DOMContentLoaded', async () => await
   retrieveDataFromIndexedDB().then(wallpaper => setWallpaper(wallpaper)).catch(error => console.error(error)));
 
 async function retrieveDataFromIndexedDB() {
@@ -50,10 +47,9 @@ async function retrieveDataFromIndexedDB() {
 
 function setWallpaper(wallpaper) {
 
-  console.log('setting wallpaper', wallpaper)
-  // Set the background image or process the wallpaper here
-  const wallpaperUrl = `url(${wallpaper.trim()})`;
-  document.body.style.backgroundImage = wallpaperUrl;
+  console.log('setting wallpaper', wallpaper.length, wallpaper)
+  const wallpaperUrl = wallpaper.replace(/[\r\n\s]+/g, '').trim()
+  document.body.style.backgroundImage = `url(${wallpaperUrl})`;
   document.body.style.backgroundSize = "cover";
   document.body.style.backgroundRepeat = "no-repeat";
   document.body.style.backgroundPosition = "center";
