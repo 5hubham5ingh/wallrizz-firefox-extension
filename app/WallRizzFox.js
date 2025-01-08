@@ -1,6 +1,5 @@
 import { exit, getenv, in as stdin, loadFile, open, out as stdout } from "std";
 import { isatty, stat } from "os";
-import { exec as execAsync } from "../../qjs-ext-lib/src/process.js";
 
 // Read a message from stdin using the length-prefixed header
 function getMessage() {
@@ -63,7 +62,7 @@ const chunkSize = 1000000;
 const wallpaperFilePathCache = getenv("HOME")?.concat(
   "/.cache/WallRizzFox/wallpaperPath.txt",
 );
-async function sendWallpaper() {
+function sendWallpaper() {
   const sendData = () => {
     // Calculate the end position for this chunk
     const endPosition = Math.min(
@@ -111,17 +110,8 @@ async function sendWallpaper() {
   const wallpaperPath = loadFile(wallpaperFilePathCache).trim();
   wallpaperLastMTime = fileStats.mtime;
 
-  // Extract extension once
-  const extension = wallpaperPath.slice(wallpaperPath.lastIndexOf(".") + 1);
+  image = loadFile(wallpaperPath);
 
-  // Combine base64 encoding and data URL creation
-  const imageBase64encoded = await execAsync([
-    "base64",
-    "-w",
-    0,
-    wallpaperPath,
-  ]);
-  image = `data:image/${extension};base64,${imageBase64encoded}`;
   sendData();
 }
 
@@ -160,7 +150,7 @@ while (true) {
         sendTheme();
         break;
       case "getWallpaper":
-        await sendWallpaper();
+        sendWallpaper();
     }
   } catch (err) {
     const message = {
