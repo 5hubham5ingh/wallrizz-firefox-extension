@@ -108,7 +108,7 @@ async function storeDataInIndexedDB(data) {
       const transaction = db.transaction(storeName, "readwrite");
       const objectStore = transaction.objectStore(storeName);
 
-      const putRequest = objectStore.put(data, "data"); // "data" is the key. overwrites if the key already exists
+      const putRequest = objectStore.put(data, "wallpaper"); // "data" is the key. overwrites if the key already exists
 
       putRequest.onsuccess = () => {
         resolve();

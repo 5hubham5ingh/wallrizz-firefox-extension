@@ -27,9 +27,11 @@
     "default_title": "Toggle extension."
   },
 
-  "permissions": ["nativeMessaging", "theme","storage"],
+  "permissions": ["nativeMessaging", "theme", "storage"],
 
   "chrome_url_overrides": {
     "newtab": "index.html"
-  }
+  },
+
+"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
