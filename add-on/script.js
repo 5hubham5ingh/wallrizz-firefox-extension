@@ -11,11 +11,12 @@ browser.storage.local.onChanged.addListener(async (changes, area) => {
   setWallpaper(wallpaper)
 });
 
-const dbName = "myDatabase";
-const storeName = "myStore";
+// Set wallpaper on first page load
 document.addEventListener('DOMContentLoaded', async () => await
   retrieveDataFromIndexedDB().then(wallpaper => setWallpaper(wallpaper)).catch(error => console.error(error)));
 
+const dbName = "myDatabase";
+const storeName = "myStore";
 async function retrieveDataFromIndexedDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, 1);
@@ -53,4 +54,7 @@ function setWallpaper(wallpaper) {
   document.body.style.backgroundSize = "cover";
   document.body.style.backgroundRepeat = "no-repeat";
   document.body.style.backgroundPosition = "center";
+  document.body.style.width = "100%";
+  document.body.style.height = "100vh";
+  document.body.style.backgroundAttachment = "fixed";
 }
