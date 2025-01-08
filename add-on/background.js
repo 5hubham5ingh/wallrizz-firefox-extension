@@ -23,7 +23,6 @@ toggleExtension();
 
 browser.browserAction.onClicked.addListener(toggleExtension);
 
-
 const wallpaperChunks = [];
 port.onMessage.addListener(async (message) => {
   if (message.status === 1) {
@@ -35,28 +34,19 @@ port.onMessage.addListener(async (message) => {
 
   switch (message.type) {
     case "theme":
-      console.log("fetching theme");
       await setTheme(message.data);
       break;
     case "wallpaper":
       if (message.status === 0.5) {
         wallpaperChunks.push(message.data);
-        console.log(
-          "Wallpaper chunk received",
-          wallpaperChunks.reduce((acc, chunk) => acc + chunk.length, 0),
-          "data received",
-          message.data.length,
-        );
         port.postMessage("getWallpaper");
       } else if (message.status === 0) {
         wallpaperChunks.push(message.data);
         const base64Wallpaper = wallpaperChunks.join("");
         await setWallpaper(base64Wallpaper);
-        console.log("Transfer completed", "received:", base64Wallpaper.length);
 
         // Clear chunks
         wallpaperChunks.length = 0;
-        console.log("Reset wallpaper chunks.");
       }
       break;
   }
@@ -64,7 +54,7 @@ port.onMessage.addListener(async (message) => {
 
 port.onDisconnect.addListener((port) => {
   if (port.error) {
-    console.log(`Disconnected due to an error: ${port.error.message}`);
+    console.error(`Disconnected due to an error: ${port.error.message}`);
   } else {
     console.log(`Disconnected`, port);
   }
@@ -72,15 +62,12 @@ port.onDisconnect.addListener((port) => {
 
 async function setTheme(data) {
   const theme = JSON.parse(data);
-  console.log("Fetched theme");
   await browser.theme.update(theme);
 }
 
 async function setWallpaper(data) {
   // send data to script.js via message
-  console.log("saving data in indexDb", data);
   await storeDataInIndexedDB(data);
-  console.log("data saved. sending status = 0 ");
   browser.storage.local.set({ status: 0 });
 }
 

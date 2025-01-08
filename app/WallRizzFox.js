@@ -63,9 +63,7 @@ const chunkSize = 1000000;
 const wallpaperFilePathCache = getenv("HOME")?.concat(
   "/.cache/WallRizzFox/wallpaperPath.txt",
 );
-
 async function sendWallpaper() {
-  image = "";
   const sendData = () => {
     // Calculate the end position for this chunk
     const endPosition = Math.min(
@@ -117,7 +115,12 @@ async function sendWallpaper() {
   const extension = wallpaperPath.slice(wallpaperPath.lastIndexOf(".") + 1);
 
   // Combine base64 encoding and data URL creation
-  const imageBase64encoded = await execAsync(["base64", wallpaperPath]);
+  const imageBase64encoded = await execAsync([
+    "base64",
+    "-w",
+    0,
+    wallpaperPath,
+  ]);
   image = `data:image/${extension};base64,${imageBase64encoded}`;
   sendData();
 }

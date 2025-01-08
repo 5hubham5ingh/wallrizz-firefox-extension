@@ -1,47 +1,56 @@
-console.log("script.js")
-
-
 // Set wallpaper on first page load
-document.addEventListener('DOMContentLoaded', async () => await
-  retrieveDataFromIndexedDB("wallpaper").then(wallpaper => setWallpaper(wallpaper)).catch(error => console.error(error)));
+document.addEventListener(
+  "DOMContentLoaded",
+  async () =>
+    await retrieveDataFromIndexedDB("wallpaper").then((wallpaper) =>
+      setWallpaper(wallpaper)
+    ).catch((error) => console.error(error)),
+);
 
 // listen for wallpaper update
 browser.storage.local.onChanged.addListener(async () => {
-  console.log('local Storage updated');
-
   const wallpaper = await retrieveDataFromIndexedDB("wallpaper");
-  setWallpaper(wallpaper)
+  setWallpaper(wallpaper);
 });
 
 // Listen for custom js and html upload
-document.getElementById('fileUpload').addEventListener('change', function(event) {
-  const file = event.target.files[0];
+document.getElementById("fileUpload").addEventListener(
+  "change",
+  function (event) {
+    const file = event.target.files[0];
 
-  // Check if a file is selected and it's valid
-  if (file && (file.name.endsWith('.html') || file.name.endsWith('.js'))) {
-    const reader = new FileReader();
+    // Check if a file is selected and it's valid
+    if (file && (file.name.endsWith(".html") || file.name.endsWith(".js"))) {
+      const reader = new FileReader();
 
-    reader.onload = async function(e) {
-      const content = e.target.result; // Access file content
-      injectUserContent(content, file.name.slice(file.name.lastIndexOf('.') + 1))
-    };
+      reader.onload = async function (e) {
+        const content = e.target.result; // Access file content
+        injectUserContent(
+          content,
+          file.name.slice(file.name.lastIndexOf(".") + 1),
+        );
+      };
 
-    reader.onerror = function(error) {
-      console.error('Error reading file:', error);
-      // Handle file read errors (e.g., display an error message to the user)
-    };
+      reader.onerror = function (error) {
+        console.error("Error reading file:", error);
+        // Handle file read errors (e.g., display an error message to the user)
+      };
 
-    reader.readAsText(file); // Read file as text (adjust based on file type)
-  } else {
-    console.warn('Invalid file selected. Please choose a .html or .js file.', file);
-  }
-});
+      reader.readAsText(file); // Read file as text (adjust based on file type)
+    } else {
+      console.warn(
+        "Invalid file selected. Please choose a .html or .js file.",
+        file,
+      );
+    }
+  },
+);
 
 // Listen for Ctrl+Enter to upload custom html and js
-document.addEventListener('keydown', function(event) {
-  if (event.ctrlKey && event.key === 'u') {
+document.addEventListener("keydown", function (event) {
+  if (event.ctrlKey && event.key === "u") {
     if (confirm("Upload custom HTML and JS?")) {
-      document.getElementById('fileUpload').click();
+      document.getElementById("fileUpload").click();
     }
   }
 });
@@ -50,25 +59,24 @@ document.addEventListener('keydown', function(event) {
 async function injectUserContent(content, type) {
   try {
     switch (type) {
-      case 'js':
+      case "js":
         const userScript = new Function(content);
         await userScript();
         break;
 
-      case 'html':
-        // Sanitize HTML and inject
-        const tempElement = document.createElement('div');
+      case "html":
+        const tempElement = document.createElement("div");
         tempElement.innerHTML = content;
         const elementsToInject = Array.from(tempElement.childNodes); // Convert to array for safe iteration
 
         const body = document.body;
-        elementsToInject.forEach(element => {
+        elementsToInject.forEach((element) => {
           body.appendChild(element);
         });
         break;
 
-      case 'css':
-        const styleElement = document.createElement('style');
+      case "css":
+        const styleElement = document.createElement("style");
         styleElement.textContent = content;
         document.head.appendChild(styleElement);
         break;
@@ -77,7 +85,6 @@ async function injectUserContent(content, type) {
         console.error("Invalid content type:", type);
         return;
     }
-    console.log(`${type.toUpperCase()} injected successfully.`);
   } catch (error) {
     console.error(`Error injecting ${type}:`, error);
   }
@@ -115,10 +122,7 @@ async function retrieveDataFromIndexedDB(data) {
 }
 
 function setWallpaper(wallpaper) {
-
-  console.log('setting wallpaper', wallpaper.length, wallpaper)
-  const wallpaperUrl = wallpaper.replace(/[\r\n\s]+/g, '').trim()
-  document.body.style.backgroundImage = `url(${wallpaperUrl})`;
+  document.body.style.backgroundImage = `url(${wallpaper})`;
   document.body.style.backgroundSize = "cover";
   document.body.style.backgroundRepeat = "no-repeat";
   document.body.style.backgroundPosition = "center";
