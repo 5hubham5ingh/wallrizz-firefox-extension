@@ -16,14 +16,15 @@ browser.storage.local.onChanged.addListener(async () => {
 // Listen for custom js and html upload
 document.getElementById("fileUpload").addEventListener(
   "change",
-  function (event) {
+  function(event) {
     const file = event.target.files[0];
 
     // Check if a file is selected and it's valid
-    if (file && (file.name.endsWith(".html") || file.name.endsWith(".js"))) {
+    if (file && (file.name.endsWith(".html") || file.name.endsWith(".js") || file.name.endsWith(".css")
+    )) {
       const reader = new FileReader();
 
-      reader.onload = async function (e) {
+      reader.onload = async function(e) {
         const content = e.target.result; // Access file content
         injectUserContent(
           content,
@@ -31,7 +32,7 @@ document.getElementById("fileUpload").addEventListener(
         );
       };
 
-      reader.onerror = function (error) {
+      reader.onerror = function(error) {
         console.error("Error reading file:", error);
         // Handle file read errors (e.g., display an error message to the user)
       };
@@ -47,7 +48,7 @@ document.getElementById("fileUpload").addEventListener(
 );
 
 // Listen for Ctrl+Enter to upload custom html and js
-document.addEventListener("keydown", function (event) {
+document.addEventListener("keydown", function(event) {
   if (event.ctrlKey && event.key === "u") {
     if (confirm("Upload custom HTML and JS?")) {
       document.getElementById("fileUpload").click();

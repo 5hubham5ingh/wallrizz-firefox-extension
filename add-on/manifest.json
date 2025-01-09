@@ -27,7 +27,7 @@
     "default_title": "Toggle extension."
   },
 
-  "permissions": ["nativeMessaging", "theme", "storage"],
+  "permissions": ["history","nativeMessaging", "theme", "storage"],
 
   "chrome_url_overrides": {
     "newtab": "index.html"

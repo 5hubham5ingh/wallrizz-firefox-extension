@@ -68,7 +68,6 @@ async function setTheme(data) {
 async function setWallpaper(data) {
   // send data to script.js via message
   await storeDataInIndexedDB(data);
-  console.log("here", data);
   browser.storage.local.set({ status: 0 });
 }
 
