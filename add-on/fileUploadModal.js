@@ -15,40 +15,9 @@ function hideModal() {
 
 // Function to handle file selection
 function handleFiles(files) {
-  const fileListDiv = document.querySelector(".file-list");
-  fileListDiv.innerHTML = "";
-  fileList.style.display = "block";
-
-  Array.from(files).forEach((file) => {
-    const fileItem = document.createElement("div");
-    fileItem.className = "file-item";
-
-    const fileIcon = document.createElement("svg");
-    fileIcon.className = "file-icon";
-    fileIcon.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                `;
-
-    const fileName = document.createElement("span");
-    fileName.className = "file-name";
-    fileName.textContent = file.name;
-
-    const removeButton = document.createElement("button");
-    removeButton.className = "remove-file";
-    removeButton.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                `;
-    removeButton.onclick = () => fileItem.remove();
-
-    fileItem.appendChild(fileIcon);
-    fileItem.appendChild(fileName);
-    fileItem.appendChild(removeButton);
-    fileListDiv.appendChild(fileItem);
-  });
+  const filesArray = Array.from(files);
+  storeDataInIndexedDB("files", filesArray);
+  window.location.reload();
 }
 
 // Event listeners
@@ -78,5 +47,3 @@ modal.onclick = (e) => {
   if (e.target === modal) hideModal();
 };
 
-// Show modal initially (remove this in production if you want to trigger it differently)
-showModal();

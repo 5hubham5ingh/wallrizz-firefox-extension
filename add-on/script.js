@@ -6,7 +6,7 @@ document.addEventListener(
       setWallpaper(wallpaper)
     ).catch((error) => console.error(error));
     const files = await retrieveDataFromIndexedDB("files");
-    processFiles(files);
+    if(files) processFiles(files);
   },
 );
 
@@ -22,25 +22,11 @@ browser.storage.local.onChanged.addListener(async () => {
 // Listen for Ctrl+Enter to upload custom html, css, and js.
 document.addEventListener("keydown", function (event) {
   if (event.ctrlKey && event.key === "Enter") {
-    if (confirm("Upload custom HTML and JS?")) {
-      document.getElementById("fileUpload").click();
-    }
+    showModal()
   }
 });
 
-// Listen for custom html, css and js upload
-document.getElementById("fileUpload").addEventListener(
-  "change",
-  handleFileUpload,
-);
-
 /* ----------------------- Helpers ------------------------ */
-
-function handleFileUpload(e) {
-  const filesArray = Array.from(e.target.files);
-  storeDataInIndexedDB("files", filesArray);
-  window.location.reload();
-}
 
 function processFiles(filesArray) {
   for (const fileExtension of fileExtensions) {

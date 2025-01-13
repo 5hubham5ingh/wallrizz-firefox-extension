@@ -1,5 +1,5 @@
 import { exit, getenv, in as stdin, loadFile, open, out as stdout } from "std";
-import { isatty, stat } from "os";
+import { isatty, stat, mkdir,exec } from "os";
 
 // Read a message from stdin using the length-prefixed header
 function getMessage() {
@@ -25,14 +25,17 @@ function sendMessage(message) {
 let lastMTime;
 function sendTheme() {
   const themeFilePathCache = getenv("HOME")?.concat(
-    "/.cache/WallRizzFox/themeConfigPath.txt",
+    "/.cache/WallRizzFox/themeConfigPath.txt"
   );
 
   const [fileStats, err] = stat(themeFilePathCache);
   if (err !== 0) {
     throw Error(
-      "Failed to read " + themeFilePathCache + " stats." +
-      "\nError code: " + err,
+      "Failed to read " +
+        themeFilePathCache +
+        " stats." +
+        "\nError code: " +
+        err
     );
   }
   if (lastMTime && fileStats.mtime <= lastMTime) return;
@@ -49,9 +52,7 @@ function sendTheme() {
     };
     sendMessage(message);
   } else {
-    throw Error(
-      "Failed to load current theme file: " + currentThemeFilePath,
-    );
+    throw Error("Failed to load current theme file: " + currentThemeFilePath);
   }
 }
 
@@ -60,14 +61,14 @@ let wallpaperLastMTime;
 let image;
 const chunkSize = 1000000;
 const wallpaperFilePathCache = getenv("HOME")?.concat(
-  "/.cache/WallRizzFox/wallpaperPath.txt",
+  "/.cache/WallRizzFox/wallpaperPath.txt"
 );
 function sendWallpaper() {
   const sendData = () => {
     // Calculate the end position for this chunk
     const endPosition = Math.min(
       wallpaperFileTransferOffset + chunkSize,
-      image.length,
+      image.length
     );
 
     // Slice the data
@@ -98,7 +99,7 @@ function sendWallpaper() {
   const [fileStats, err] = stat(wallpaperFilePathCache);
   if (err !== 0) {
     throw Error(
-      `Failed to read ${wallpaperFilePathCache} stats.\nError code: ${err}`,
+      `Failed to read ${wallpaperFilePathCache} stats.\nError code: ${err}`
     );
   }
 
@@ -108,31 +109,37 @@ function sendWallpaper() {
   }
 
   const wallpaperPath = loadFile(wallpaperFilePathCache).trim();
-  if (!wallpaperPath) throw Error("Failed to read wallpaper path file: " + wallpaperFilePathCache)
+  if (!wallpaperPath)
+    throw Error(
+      "Failed to read wallpaper path file: " + wallpaperFilePathCache
+    );
   wallpaperLastMTime = fileStats.mtime;
 
   image = loadFile(wallpaperPath);
-  if (!image) throw Error("Failed to read base64 wallpaper file: " + wallpaperPath)
+  if (!image)
+    throw Error("Failed to read base64 wallpaper file: " + wallpaperPath);
   sendData();
 }
 
 if (isatty()) {
   const nativeAppJson = {
-    "name": "WallRizzFox",
-    "description": "Native app manifest for firefox.",
-    "path": scriptArgs[1] ?? "/usr/bin/WallRizzFox",
-    "type": "stdio",
-    "allowed_extensions": ["WallRizz@Fox"],
+    name: "WallRizzFox",
+    description: "Native app manifest for firefox.",
+    path: scriptArgs[1] ?? "/usr/bin/WallRizzFox",
+    type: "stdio",
+    allowed_extensions: ["WallRizz@Fox"],
   };
+  const nativeAppManifestDir = "/usr/lib/mozilla/native-messaging-hosts/";
+  const nativeAppManifestFilePath = nativeAppManifestDir + "WallRizzFox.json";
 
-  const nativeAppManifestFilePath =
-    "/usr/lib/mozilla/native-messaging-hosts/WallRizzFox.json";
+  exec(["mkdir","-p",nativeAppManifestDir])
   const nativeAppManifest = open(nativeAppManifestFilePath, "w+");
 
   if (!nativeAppManifest) {
     print(
-      '  Failed to open native app manifest "' + nativeAppManifestFilePath +
-      '".\n  Run "sudo WallRizzFox" to generate the app manifest.',
+      '  Failed to open native app manifest "' +
+        nativeAppManifestFilePath +
+        `".\n  Run 'sudo touch "${nativeAppManifestFilePath}" && WallRizzFox' to generate the app manifest.`
     );
     exit(1);
   }
